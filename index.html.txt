@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Rune of the Day - Expanded Wisdom</title>
+    <!-- Loading necessary libraries from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+        
+        body { 
+            background-color: #020617; 
+            color: #f8fafc; 
+            font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; 
+        }
+
+        .font-serif { 
+            font-family: 'Cinzel', serif; 
+        }
+
+        @keyframes spin-slow { 
+            from { transform: rotate(0deg); } 
+            to { transform: rotate(360deg); } 
+        }
+
+        .animate-spin-slow { 
+            animation: spin-slow 40s linear infinite; 
+        }
+
+        .rune-glow { 
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5); 
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        const RUNES_DATABASE = [
+            { 
+                name: 'Fehu', 
+                symbol: 'ᚠ', 
+                meaning: 'Wealth and Mobile Energy', 
+                thoughts: [
+                    "True wealth is not what you accumulate, but what you are able to set in motion.",
+                    "The 'whisper of the gods' reminds you that abundance is a frequency, not just a number.",
+                    "As mobile energy, Fehu asks you to share your brightness so it can multiply.",
+                    "Stagnant possession becomes a burden; flow is life.",
+                    "Your value lies not in what you have, but in the generosity of your spirit.",
+                    "Wealth is a means for growth, never the ultimate goal of the warrior.",
+                    "Every material gain must be balanced with a spiritual purpose.",
+                    "The flow of life is circular: what you give with honesty returns transformed.",
+                    "Abundance is having the freedom to create and the will to serve.",
+                    "Do not fear the void; it is the space necessary for the new to enter.",
+                    "Money energy is a mirror of your fears or your trust.",
+                    "Material success is a test of responsibility, not a prize for the ego.",
+                    "Sow today with detachment to reap tomorrow with gratitude.",
+                    "Mobile wealth nourishes the community; static wealth stifles the soul.",
+                    "Your talent is your most valuable capital; put it to work for the common good.",
+                    "Prosperity begins with a thought of sufficiency.",
+                    "The gold of the spirit shines strongest in times of outer scarcity.",
+                    "Every exchange is an opportunity to practice integrity.",
+                    "True gain is that which does not subtract value from others.",
+                    "Walk with a firm step knowing that the universe provides to those who act with righteousness."
+                ], 
+                recommendations: ["Today is a day to invest in yourself or a project that benefits others.", "Review your relationship with material things.", "Find a way to be unexpectedly generous."] 
+            },
+            { 
+                name: 'Uruz', 
+                symbol: 'ᚢ', 
+                meaning: 'Vital Strength and Health', 
+                thoughts: [
+                    "The strength of the aurochs is raw; the Spiritual Warrior gives it direction and purpose.",
+                    "Your body is the temple where your power resides; listen to it before it screams.",
+                    "Shape-shifting is necessary to survive. Do not fear your own internal potency.",
+                    "Vitality is born from a deep connection with the earth and its rhythms.",
+                    "Your will is the rudder that governs the storm of your instincts.",
+                    "Health is not the absence of disease, but the presence of vital harmony.",
+                    "Accept your wild side, but do not let it devour you.",
+                    "Physical endurance is the reflection of the soul's tenacity.",
+                    "True strength is that which is used to protect and build.",
+                    "Transform your weakness into the fuel for your next victory.",
+                    "Conscious rest is as vital as maximum effort.",
+                    "Your breath is the bridge between your body and the infinite.",
+                    "Do not confuse aggressiveness with power; real power is silent.",
+                    "Uruz energy asks you to let the old die to be reborn stronger.",
+                    "Heal your inner wounds so they stop draining your outer strength.",
+                    "Discipline is the highest form of self-love.",
+                    "Trust in the biological wisdom of your cells.",
+                    "Strength is cultivated by overcoming self-imposed limits.",
+                    "You are stronger than your mind dares to admit.",
+                    "Health is the dynamic balance between action and stillness."
+                ], 
+                recommendations: ["Perform an activity that makes you feel vital.", "Face that challenge that intimidated you.", "Purify your physical environment."] 
+            },
+            { 
+                name: 'Thurisaz', 
+                symbol: 'ᚦ', 
+                meaning: 'Protection and Conflict', 
+                thoughts: [
+                    "The thorn protects the rose, but it can also hurt. Choose your battles well.",
+                    "Sometimes the greatest enemy is not outside, but in the resistance we put up to change.",
+                    "Conflict is often the prelude to a great revelation. Observe the threshold.",
+                    "The strongest defense is a transparent and upright spirit.",
+                    "Do not strike without need; the echo of your attack will return to you.",
+                    "Protection is born from the knowledge of your own limits.",
+                    "Crisis is the hammer that forges the steel of your character.",
+                    "Learn to say 'no' with the firmness of lightning and the calm of the air.",
+                    "The giant you fear is often a shadow of your own ego.",
+                    "Stay alert: complacency is the easiest wall to tear down.",
+                    "Every destructive force can be channeled toward necessary cleaning.",
+                    "Chaos is just order you haven't yet understood.",
+                    "Thurisaz's thorn reminds you that growth requires protection.",
+                    "Uncontrolled anger is a weapon that wounds you.",
+                    "Face your fears with the authority of one who knows who they are.",
+                    "True peace is that which holds in the middle of the storm.",
+                    "Not everyone who contradicts you is your enemy.",
+                    "The threshold is the place of greatest danger and greatest transformation.",
+                    "Reactive force is weakness; conscious force is sovereignty.",
+                    "Sharpen your mind so you don't have to use your sword."
+                ], 
+                recommendations: ["Do not act on impulse today.", "Meditate on what makes you feel defensive.", "Establish healthy boundaries."] 
+            },
+            { 
+                name: 'Ansuz', 
+                symbol: 'ᚨ', 
+                meaning: 'Communication and Wisdom', 
+                thoughts: [
+                    "The word is the vehicle of the spirit. Speak with truth and you will hear wisdom.",
+                    "Pay attention to 'coincidences'; they are messages from the unconscious seeking your attention.",
+                    "Knowledge becomes wisdom only when applied with compassion.",
+                    "Silence is the space where the gods whisper their secrets.",
+                    "Your voice has the power to bless or to curse; choose it carefully.",
+                    "Inspiration is a divine breath that only enters open minds.",
+                    "Learn to listen to what is said between the lines and beyond sounds.",
+                    "Honest communication is the bridge that unites two souls.",
+                    "Your life is a message; make sure it's worth reading.",
+                    "Wisdom is not accumulated, it is lived in every present gesture.",
+                    "The whisper of the wind brings news from the origin; stop and listen.",
+                    "Speaking is silver, listening is gold, understanding is diamond.",
+                    "Mental clarity is born from emotional honesty.",
+                    "Be a channel for truth, not an echo of others' opinions.",
+                    "Intuition is the voice of the spirit guiding your reason.",
+                    "Every external sign is a reflection of an internal need.",
+                    "Language is a magical tool; use it to create realities.",
+                    "Seek knowledge in books, but wisdom in experience.",
+                    "True intelligence is knowing there is always something more to learn.",
+                    "The Warrior's word is their most sacred bond."
+                ], 
+                recommendations: ["Listen more than you speak today.", "Write your thoughts in a journal.", "Seek advice from a mentor."] 
+            },
+            { 
+                name: 'Raido', 
+                symbol: 'ᚱ', 
+                meaning: 'The Journey and Rhythm', 
+                thoughts: [
+                    "The road is the destination. If the rhythm is right, you will get where you need to be.",
+                    "Life is a dance of cycles. Learn to flow with the music of the cosmos.",
+                    "Traveling outward is often the pretext for the most important journey: the inward one.",
+                    "Do not fear movement; that which is stagnant is what dies.",
+                    "Direction is more important than speed.",
+                    "Your internal compass never fails if you keep it clear of judgments.",
+                    "Every step is a choice; every choice is a destination.",
+                    "The rhythm of your breath marks the beat of your existence.",
+                    "Accept the detours of the road; they are often the soul's shortcuts.",
+                    "Freedom is the ability to choose your own path.",
+                    "The wise traveler carries no unnecessary baggage in their mind.",
+                    "Align your personal will with the cosmic order.",
+                    "Life asks you today to take the reins of your own chariot.",
+                    "The spiritual journey requires as much courage as the physical one.",
+                    "Do not look for the end of the road; the end is only a new beginning.",
+                    "Constancy is the key that opens all closed doors.",
+                    "Learn to rest in motion, not in inactivity.",
+                    "Nature's rhythm is perfect; trust its timing.",
+                    "You are the driver of your life, not a mere passenger of destiny.",
+                    "Walk light, walk with purpose, walk with joy."
+                ], 
+                recommendations: ["Take a different route to work.", "Plan your next important step.", "Trust the process."] 
+            },
+            { 
+                name: 'Kenaz', 
+                symbol: 'ᚲ', 
+                meaning: 'Knowledge and Light', 
+                thoughts: [
+                    "The torch illuminates the path, but it also consumes the old to create heat.",
+                    "Creativity is the pure expression of the soul. Let your inner fire shine.",
+                    "Mental clarity arrives when we stop looking outside and turn on the inner light.",
+                    "Knowledge is power only when transformed into conscious action.",
+                    "Passion is the fire that animates your dreams; do not let it go out.",
+                    "Truth is a light that sometimes dazzles before it illuminates.",
+                    "Be like the flame: always pointing upward, no matter the wind.",
+                    "Curiosity is the spark that starts the fire of wisdom.",
+                    "Transform your darkness into the canvas where you will paint your light.",
+                    "Mastery is the result of polishing your fire with the stone of discipline.",
+                    "A single luminous thought can dispel years of shadows.",
+                    "Clear vision requires a brave heart.",
+                    "Do not hide your light for fear of judgment; the world needs your brightness.",
+                    "Kenaz energy is that of the artisan who creates beauty from effort.",
+                    "The warmth of your compassion can melt the ice of any conflict.",
+                    "Shine with humility; the sun does not need to announce that it has risen.",
+                    "Enlightenment is recognizing divinity in the everyday.",
+                    "Fire purifies what no longer serves to make room for the essence.",
+                    "Inspiration comes while working; don't sit around waiting for the muse.",
+                    "Your mind is a torch that must be fed with truth."
+                ], 
+                recommendations: ["Start that creative project you've been putting off.", "Study something you are passionate about.", "Be the light for someone today."] 
+            },
+            { 
+                name: 'Gebo', 
+                symbol: 'ᚷ', 
+                meaning: 'The Gift and Union', 
+                thoughts: [
+                    "Every sacred exchange requires balance. Giving is as important as knowing how to receive.",
+                    "True unions are soul contracts that help us grow.",
+                    "The greatest gift you can offer is your full and honest presence.",
+                    "Generosity without expectations is the highest form of freedom.",
+                    "Every relationship is a mirror where your own being is reflected.",
+                    "Gratitude is the heart's memory for the gifts of life.",
+                    "Do not sacrifice your essence for a union; a true partner empowers your being.",
+                    "The balance between the 'I' and the 'We' is the art of coexistence.",
+                    "A gift given with love has no price, only infinite value.",
+                    "Cooperation is the force that moves mountains.",
+                    "Learn to receive with humility and give with joy.",
+                    "The soul's hospitality opens doors that reason keeps closed.",
+                    "Every promise is a thread that binds you to the other; take care of it.",
+                    "Abundance is born from the ability to share what you have.",
+                    "In the union of opposites, creation is born.",
+                    "Do not ask for what you are not willing to offer.",
+                    "Loyalty is the basis of every sacred contract.",
+                    "Love is the gift that multiplies when it is divided.",
+                    "Seek harmony in every deal, in every word, in every gesture.",
+                    "You are a gift to the world; act accordingly."
+                ], 
+                recommendations: ["Do a kind gesture for someone close.", "Accept with gratitude what the day offers.", "Seek harmony in your relationships."] 
+            },
+            { 
+                name: 'Wunjo', 
+                symbol: 'ᚹ', 
+                meaning: 'Joy and Success', 
+                thoughts: [
+                    "Happiness is not a goal, but the byproduct of living in harmony with your truth.",
+                    "Glory arrives when effort and passion meet at the right point.",
+                    "Enjoy the present; yesterday is a dream and tomorrow a promise.",
+                    "True joy is born from inner peace, not from outer circumstances.",
+                    "Success is the ability to go from failure to failure without losing enthusiasm.",
+                    "Laughter is the language of the gods; use it to heal.",
+                    "Harmony is the result of tuning your thoughts with your actions.",
+                    "Celebrate your achievements, but do not stay to live in them.",
+                    "Beauty is in the eyes of the one who has decided to be happy.",
+                    "The greatest victory is the one achieved over oneself.",
+                    "Fullness is not having everything, but needing nothing else in this instant.",
+                    "Your well-being is the Warrior's priority in times of peace.",
+                    "Surround yourself with what elevates your spirit.",
+                    "Shared happiness is double joy.",
+                    "Do not let today's clouds make you forget that the sun is still there.",
+                    "Satisfaction is the rest of the just after the battle.",
+                    "Appreciate the simple; there lies the most potent magic.",
+                    "Hope is the fuel that keeps the flame of success alive.",
+                    "Be happy by decision, not by chance.",
+                    "Your smile is a shield against the world's negativity."
+                ], 
+                recommendations: ["Celebrate something today, no matter how small.", "Surround yourself with positive people.", "Allow yourself a moment of pure leisure."] 
+            },
+            { 
+                name: 'Hagalaz', 
+                symbol: 'ᚼ', 
+                meaning: 'Crisis and Transformation', 
+                thoughts: [
+                    "Hail destroys the harvest, but it waters the earth for the future. Accept change.",
+                    "The structures that break are those that could no longer sustain your growth.",
+                    "In the center of the storm lies the observer's calm. Be that observer.",
+                    "Crisis is the universe's invitation for you to wake up.",
+                    "Do not try to stop what must fall; prepare to build on the ruins.",
+                    "Radical transformation requires the symbolic death of your old ideas.",
+                    "Chaos is the raw material of a new creation.",
+                    "Accept the inevitable with the Warrior's dignity.",
+                    "Pain is the alarm clock of the sleeping consciousness.",
+                    "Nothing is permanent, except change itself.",
+                    "Purification often arrives in forms we don't understand.",
+                    "Trust that the universe knows what it's doing, even when it hurts.",
+                    "Resilience is the ability to flourish after the storm.",
+                    "You are not what happens to you, but what you decide to do with it.",
+                    "Crisis strips you of the accessory so you find the essential.",
+                    "Let go of control; life has its own plans for you.",
+                    "Hagalaz's ice will melt to fertilize your tomorrow.",
+                    "True security lies not in the outside, but in your immutable center.",
+                    "Look beyond the disaster; there is a seed of order waiting to sprout.",
+                    "The storm clears the air; breathe deeply when it passes."
+                ], 
+                recommendations: ["Do not fight the inevitable.", "Identify a destructive habit and eliminate it.", "Trust in the cleaning process."] 
+            },
+            { 
+                name: 'Nauthiz', 
+                symbol: 'ᚾ', 
+                meaning: 'Need and Resistance', 
+                thoughts: [
+                    "Need is the spark of invention. What can you create with what you have?",
+                    "Pain is a teacher that points out where we should pay attention.",
+                    "True freedom emerges when we stop being slaves to our immediate desires.",
+                    "Resistance is the training necessary to strengthen your will.",
+                    "Need forces you to prioritize what really matters.",
+                    "Accept your limitations today so you can overcome them tomorrow.",
+                    "Friction generates heat; use that heat to light your inner fire.",
+                    "Destiny puts you to the test to see how firm your purpose is.",
+                    "Do not blame circumstances; look for the lesson they hide.",
+                    "Patience is the wisest form of resistance.",
+                    "Austerity clears the mind and strengthens the spirit.",
+                    "Learn to live with the essential and you will discover you have more than enough.",
+                    "Outer scarcity is often an invitation to inner wealth.",
+                    "The universe's 'No' is often a 'Not yet' or a 'By another path'.",
+                    "Your will is stronger than any external obstacle.",
+                    "Discipline in the midst of lack is the mark of the Warrior.",
+                    "Do not give in to fatigue; it is the threshold of the second breath.",
+                    "Need is the mother of creativity.",
+                    "Find peace in the midst of restriction.",
+                    "Resistance is just the weight that grows the soul's muscles."
+                ], 
+                recommendations: ["Practice austerity today.", "Be patient with your limitations.", "Help someone who has less than you."] 
+            },
+            { 
+                name: 'Isa', 
+                symbol: 'ᛁ', 
+                meaning: 'Ice and Pause', 
+                thoughts: [
+                    "Ice preserves and stops. Sometimes, the most powerful action is to do nothing.",
+                    "In the stillness of the cold, the ego crystallizes and can be observed with clarity.",
+                    "Do not force the thaw. Every season has its purpose and its time.",
+                    "The pause is the space where the future movement is gestated.",
+                    "Silence is the language of the soul when words are no longer enough.",
+                    "Inactivity is not laziness, it is strategic energy saving.",
+                    "Observe the beauty of the static form before it transforms.",
+                    "Cold purifies vision by removing the distractions of heat.",
+                    "Stay firm in your center while the world stops around you.",
+                    "Patience is the art of waiting without anxiety.",
+                    "Isa's ice protects you from the outer influences you don't need.",
+                    "Reflect on your plans before putting them into action.",
+                    "Clarity arrives when the water of the mind stills completely.",
+                    "Do not try to run on ice; walk with caution and awareness.",
+                    "Take advantage of your soul's winter to strengthen your roots.",
+                    "Introspection is the most productive journey in times of pause.",
+                    "Accept life's 'Stop' as a gift of protection.",
+                    "Solitude is the workshop where independence is forged.",
+                    "Nothing lasts forever, not even the harshest winter.",
+                    "In total stillness you will find the answers that noise was hiding."
+                ], 
+                recommendations: ["Meditate in solitude today.", "Postpone important decisions.", "Focus on strengthening your inner center."] 
+            },
+            { 
+                name: 'Jera', 
+                symbol: 'ᛃ', 
+                meaning: 'Harvest and Natural Cycles', 
+                thoughts: [
+                    "You have sown with effort; now it is time to receive with humility.",
+                    "Nature is in no hurry, and yet, everything arrives at completion.",
+                    "Honor your processes. Every step of the cycle is vital for the final result.",
+                    "Constancy is the mother of good fortune.",
+                    "Every action has its reaction; every sowing its harvest.",
+                    "Patience is the virtue that allows the fruit to ripen.",
+                    "Enjoy today's success, but do not forget to prepare the land for tomorrow.",
+                    "Time is your ally, not your enemy.",
+                    "Cosmic justice manifests in the results of your acts.",
+                    "Celebrate the abundance you have co-created with the universe.",
+                    "The cycle of life is perfect in its eternal return.",
+                    "Do not look for immediate results; look for authentic processes.",
+                    "Gratitude is the fertilizer that makes the next harvest greater.",
+                    "Learn from the mistakes of the past to sow better in the present.",
+                    "Prosperity is the natural flow of one who acts with integrity.",
+                    "Every reward has an antecedent of conscious effort.",
+                    "Trust in the rhythm of your life's seasons.",
+                    "Maturity is knowing how to wait for the right moment to act.",
+                    "Your work well done is your best letter of recommendation before destiny.",
+                    "Peace arrives when you understand that everything has its time under the sun."
+                ], 
+                recommendations: ["Reap the fruits of previous work.", "Plan for the long term.", "Thank those who helped you."] 
+            },
+            { 
+                name: 'Eihwaz', 
+                symbol: 'ᛇ', 
+                meaning: 'Resilience and Connection', 
+                thoughts: [
+                    "Like the yew, you are a bridge between earth and sky, between life and death.",
+                    "True strength is flexible. That which does not bend, breaks before the wind.",
+                    "Your roots are deeper than you think. Trust in your spiritual heritage.",
+                    "Resilience is the ability to transform poison into medicine.",
+                    "Keep your vision clear even in the darkness of the tunnel.",
+                    "The death of a stage is the necessary birth of the next one.",
+                    "Connect with your higher purpose to find the strength you lack.",
+                    "The Warrior knows that strategic retreat is part of the final victory.",
+                    "Your integrity is your most impenetrable shield.",
+                    "Life is a continuum; do not fear endings.",
+                    "Seek stability in the midst of permanent change.",
+                    "You are a channel for ancient energies seeking to express themselves through you.",
+                    "Patience and persistence conquer all things.",
+                    "Ancestral wisdom resides in your bones; listen to it.",
+                    "Protect your dreams with the tenacity of the millennial yew.",
+                    "Transformation is a painful but liberating process.",
+                    "Trust in your capacity for regeneration.",
+                    "The balance between opposites is the basis of runic magic.",
+                    "Stand tall, no matter the weight you carry on your shoulders.",
+                    "Connection with the divine is your birthright."
+                ], 
+                recommendations: ["Stay firm in your values.", "Connect with your ancestors.", "Be a pillar of support for others."] 
+            },
+            { 
+                name: 'Perthro', 
+                symbol: 'ᛈ', 
+                meaning: 'Mystery and Destiny', 
+                thoughts: [
+                    "Chance is only the name we give to laws we don't yet understand.",
+                    "Within the hidden lies the seed of all possibility. Embrace the mystery.",
+                    "Destiny is not written in stone, but in the choices you make in the present.",
+                    "Life is a sacred game; learn the rules but keep the wonder.",
+                    "What you seek is seeking you through the veils of time.",
+                    "Accept the unexpected as a sign of direction.",
+                    "The unconscious is an ocean of treasures waiting to be discovered.",
+                    "Synchronicity is the universe's wink to your conscious search.",
+                    "Do not try to control everything; leave room for magic.",
+                    "Your intuition is the compass in the labyrinth of destiny.",
+                    "There are forces operating beyond your limited vision; trust.",
+                    "The dice cup is being shaken for you today; prepare to act.",
+                    "The secret is often the key that opens the door to freedom.",
+                    "Nothing happens by chance on the path of self-knowledge.",
+                    "Learn to read the signs in the everyday.",
+                    "Luck favors the prepared mind and the brave heart.",
+                    "The hidden reveals itself to the one who has the patience to observe.",
+                    "Your destiny is co-created between your will and cosmic chance.",
+                    "Embrace uncertainty; it is the space of pure freedom.",
+                    "Every honest question receives a symbolic answer."
+                ], 
+                recommendations: ["Open your mind to the unexpected.", "Pay attention to your hunches.", "Play and recover your sense of wonder."] 
+            },
+            { 
+                name: 'Algiz', 
+                symbol: 'ᛉ', 
+                meaning: 'Protection and Higher Consciousness', 
+                thoughts: [
+                    "Your greatest protection is to maintain a high vibration and pure thoughts.",
+                    "Like the elk, stay alert but calm. Intuition is your spiritual radar.",
+                    "You are connected with the divine; nothing can harm you if you stay in your center.",
+                    "Protection is born from alignment with your higher purpose.",
+                    "Your spiritual guides are closer than you imagine; ask for help.",
+                    "Consciousness is the strongest shield against negativity.",
+                    "Keep your thoughts elevated to attract luminous realities.",
+                    "True security is an internal state, not an external condition.",
+                    "Be a channel for the light and darkness will dissipate in your path.",
+                    "Listen to the spirit's messages in the silence of your heart.",
+                    "Your connection to the origin is unbreakable.",
+                    "Act with the authority of one who knows they are protected by the universe.",
+                    "Prayer and meditation are your most effective defense weapons.",
+                    "Do not fear the shadows; they only indicate that a light is shining nearby.",
+                    "Your integrity attracts the protection of the forces of cosmic order.",
+                    "Stay vigilant against your own internal shadows.",
+                    "Inner peace is the basis of all outer victory.",
+                    "Trust in your soul's whisper above the noise of the world.",
+                    "You are a spiritual being living a human experience; don't forget it.",
+                    "Divinity resides in you and around you."
+                ], 
+                recommendations: ["Trust your gut today.", "Visualize a light shield around you.", "Act as a protector for others."] 
+            },
+            { 
+                name: 'Sowilo', 
+                symbol: 'ᛊ', 
+                meaning: 'The Sun and Integrity', 
+                thoughts: [
+                    "Success is inevitable when you act from your whole self.",
+                    "Your inner light does not need permission to shine. Simply, be yourself.",
+                    "Victory is bitter if it is not achieved with honor and integrity.",
+                    "Total clarity dispels all doubts; act now.",
+                    "You are the sun of your own system; illuminate your life and others'.",
+                    "Vital energy flows strongly through you; channel it with wisdom.",
+                    "Integrity is doing the right thing even when no one is watching.",
+                    "Seek excellence, not perfection.",
+                    "Your charisma is a gift; use it to inspire, never to manipulate.",
+                    "Health and vitality are the reflection of a spirit at peace.",
+                    "Shine so brightly that shadows have nowhere to hide.",
+                    "The sweetest victory is the one that benefits everyone involved.",
+                    "Trust in your creative power to transform any situation.",
+                    "The sun rises for everyone; be generous with your light.",
+                    "Honesty with yourself is the first step toward enlightenment.",
+                    "Act with enthusiasm and the universe will conspire in your favor.",
+                    "Keep your vision focused on the highest.",
+                    "Integrity is the glue that holds your dreams and reality together.",
+                    "Mental clarity is the result of a pure heart.",
+                    "Sowilo promises you success if you keep your course with righteousness."
+                ], 
+                recommendations: ["Share your ideas with confidence.", "Seek clarity in confusing situations.", "Recharge your energies in the sun."] 
+            },
+            { 
+                name: 'Tiwaz', 
+                symbol: 'ᛏ', 
+                meaning: 'Justice and Sacrifice', 
+                thoughts: [
+                    "The Spiritual Warrior knows you must sometimes lose a hand to win peace.",
+                    "Justice is not revenge, but the restoration of sacred balance.",
+                    "Your will is your arrow; make sure to aim at a target worth hitting.",
+                    "Conscious sacrifice is the door to mastery.",
+                    "Victory requires discipline, honor, and a just cause.",
+                    "Stay firm in your truth, even if you stand alone.",
+                    "Cosmic law is relentless but fair; trust it.",
+                    "Courage is not the absence of fear, but action in spite of it.",
+                    "Be a leader who serves, not a master who demands.",
+                    "Integrity in battle is more important than the final result.",
+                    "Accept your responsibility with your head held high.",
+                    "Justice begins in your own treatment of yourself.",
+                    "The path of the Warrior is a path of righteousness and sacrifice.",
+                    "Your word is your law; always keep it.",
+                    "Strength without justice is tyranny; justice without strength is impotence.",
+                    "Learn to let go of what you love for what is right.",
+                    "Discipline is the bridge between your goals and your achievements.",
+                    "Spiritual victory is eternal; material victory is fleeting.",
+                    "Defend the just with the calm of the wise and the strength of the warrior.",
+                    "You are the architect of your own inner justice."
+                ], 
+                recommendations: ["Do what is right, even if it's hard.", "Identify what you are willing to sacrifice.", "Be disciplined today."] 
+            },
+            { 
+                name: 'Berkano', 
+                symbol: 'ᛒ', 
+                meaning: 'Birth and Growth', 
+                thoughts: [
+                    "Every new idea needs a gestation time in the darkness of the womb.",
+                    "Real growth is silent and constant, like that of a tree in the forest.",
+                    "The feminine energy of nourishment is what allows life to flourish.",
+                    "Be patient with your own processes of maturation.",
+                    "Tenderness is a form of power that the world often forgets.",
+                    "Nourish your dreams with care and you will see them take on a life of their own.",
+                    "Rebirth is possible in every moment of your existence.",
+                    "Spiritual fertility attracts all material blessings.",
+                    "Protect the new with love and firmness.",
+                    "Growth requires letting go of the shell of the old.",
+                    "Life always finds a way to sprout, even in the asphalt.",
+                    "Be like Mother Earth: generous, patient, and life-giving.",
+                    "The beauty of Berkano lies in the purity of its beginnings.",
+                    "Care for your body and mind as the most precious garden.",
+                    "Creativity flourishes in environments of security and love.",
+                    "Home is the refuge where the soul recharges to grow.",
+                    "Sow seeds of kindness in every encounter today.",
+                    "Evolution is a natural process; do not force it, allow it.",
+                    "Healing arrives through constant and loving care.",
+                    "You are a work in constant creation and growth."
+                ], 
+                recommendations: ["Take care of something living today.", "Be kind to yourself.", "Spend time with your family or at home."] 
+            },
+            { 
+                name: 'Ehwaz', 
+                symbol: 'ᛖ', 
+                meaning: 'Movement and Partnership', 
+                thoughts: [
+                    "The rider and the horse must be one to cross the desert successfully.",
+                    "Trust is the bridge that allows us to move toward the unknown.",
+                    "Real progress happens when we coordinate our actions with others.",
+                    "Seek harmony in your partnerships; unity is strength.",
+                    "Forward movement requires loyalty and mutual cooperation.",
+                    "Learn to trust others as much as yourself.",
+                    "Balanced duality is the basis of all sustainable progress.",
+                    "Every relationship is a vehicle for your spiritual evolution.",
+                    "Fluid communication is the fuel of every successful association.",
+                    "Walk alongside your allies, neither in front nor behind.",
+                    "Changing position offers you a new perspective on reality.",
+                    "Adaptability is the mark of the wise traveler.",
+                    "Your success is linked to the success of those around you.",
+                    "Loyalty is a two-way street.",
+                    "Constant movement prevents soul stagnation.",
+                    "Seek partners who complement your weaknesses with their strengths.",
+                    "Trust is built with acts, not with words.",
+                    "Accept the help offered to you with humility and gratitude.",
+                    "Synergy creates results that none could achieve alone.",
+                    "Advance with rhythm, advance with confidence, advance accompanied."
+                ], 
+                recommendations: ["Strengthen an alliance today.", "Move physically to change the air.", "Be a loyal companion."] 
+            },
+            { 
+                name: 'Mannaz', 
+                symbol: 'ᛗ', 
+                meaning: 'Humanity and Self', 
+                thoughts: [
+                    "You are a microcosm of the universe. To know yourself is to know the whole.",
+                    "The mind is a wonderful servant but a terrible master. Train it.",
+                    "Your humanity is your greatest strength. Do not fear showing your vulnerability.",
+                    "We are threads in the same fabric; what you do to the other, you do to yourself.",
+                    "True intelligence is that which is used for the common good.",
+                    "Seek divinity within your own human form.",
+                    "Self-knowledge is the basis of all true freedom.",
+                    "Be a beacon of awareness in the midst of the world's ignorance.",
+                    "Culture and wisdom are humanity's treasures.",
+                    "Accept your shadows so you can integrate them into your light.",
+                    "Social cooperation is the reflection of internal harmony.",
+                    "Do not lose yourself in the ego; remember your connection with the whole.",
+                    "A clear mind is the mirror where universal truth is reflected.",
+                    "Your life is an opportunity to raise collective consciousness.",
+                    "Be humble in your wisdom and brave in your ignorance.",
+                    "Empathy is the glue that unites human beings.",
+                    "Reflect on your place in the order of things.",
+                    "Human evolution is an individual task with global impact.",
+                    "You are the result of thousands of years of history; honor them.",
+                    "World peace begins with peace in your own mind."
+                ], 
+                recommendations: ["Dedica tiempo a la introspección.", "Look for common ground with others.", "Evaluate your social roles."] 
+            },
+            { 
+                name: 'Laguz', 
+                symbol: 'ᛚ', 
+                meaning: 'Water and Intuition', 
+                thoughts: [
+                    "Water flows around obstacles. Do not fight, seek the path of least resistance.",
+                    "Your emotions are tides that clean the shore of your soul. Let them flow.",
+                    "Trust in the invisible. The depth of the ocean contains treasures that the surface cannot imagine.",
+                    "Intuition is your spirit's compass; never ignore it.",
+                    "Cleanse yourself of old energies as the river cleanses itself in its course.",
+                    "Life is fluid; do not try to freeze the present.",
+                    "Your feelings are guides, not jails; learn to navigate them.",
+                    "Flexibility is the key to surviving life's storms.",
+                    "Diving into your unconscious is the greatest act of courage.",
+                    "Let life take you where you need to be, not only where you want to go.",
+                    "Emotional purification is necessary for mental clarity.",
+                    "Trust in your infinite capacity for adaptation.",
+                    "Stagnant water rots; keep your energy moving.",
+                    "Listen to the whisper of your inner voice above the external noise.",
+                    "Creativity is born from emotional depths.",
+                    "Peace is like a still lake reflecting the sky.",
+                    "Do not fear your depths; there lies your true strength.",
+                    "Life asks you to flow with events, not against them.",
+                    "Healing comes through acceptance and liberating tears.",
+                    "You are part of the eternal current of existence."
+                ], 
+                recommendations: ["Take a conscious bath today.", "Don't look for logical answers now.", "Write down your dreams upon waking."] 
+            },
+            { 
+                name: 'Ingwaz', 
+                symbol: 'ᛜ', 
+                meaning: 'Potential and Storage', 
+                thoughts: [
+                    "There is a latent force in you waiting for the right moment to burst.",
+                    "Introspection is the warehouse of your future victory. Do not waste your energy.",
+                    "The conclusion of a cycle is the necessary preparation for the next big jump.",
+                    "The seed contains the whole tree; you contain your whole destiny.",
+                    "Keep your plans in the fertile silence of your heart.",
+                    "Rest is productive when used to gestate great ideas.",
+                    "Inner strength is cultivated in solitude and meditation.",
+                    "Do not rush the sprout; the earth knows when it's spring.",
+                    "Fullness arrives for the one who knows how to wait for the moment of action.",
+                    "Your potential is infinite, but it requires a container of discipline.",
+                    "Focus your energy on a single point to achieve maximum power.",
+                    "Transformation happens from the inside out.",
+                    "Your inner sacred space is your safest refuge.",
+                    "Grateful for the endings; they are the fertile ground for beginnings.",
+                    "Wisdom is digested in the silence of rest.",
+                    "Prepare the ground of your life to receive abundance.",
+                    "Maturation requires time, darkness, and constant care.",
+                    "You are a seed of light planted in the earth of matter.",
+                    "Inner peace attracts the outer conditions to flourish.",
+                    "Your latent power is the whisper of your future Self."
+                ], 
+                recommendations: ["Finish what you started today.", "Keep your plans secret.", "Find a space of solitude."] 
+            },
+            { 
+                name: 'Dagaz', 
+                symbol: 'ᛞ', 
+                meaning: 'Awakening and Transformation', 
+                thoughts: [
+                    "Night and day meet at dawn. Opposites are just faces of the same coin.",
+                    "Enlightenment is not something you achieve, it's something you recognize in the present.",
+                    "A radical change in perspective can transform your world in an instant.",
+                    "Awakening is the end of the illusion of separation.",
+                    "Accept your light and shadow with the same gratitude.",
+                    "Real transformation is irreversible and luminous.",
+                    "Every sunrise is an opportunity to be a new version of yourself.",
+                    "Dagaz's clarity dispels the deepest fears of the night.",
+                    "Trust that the universe conspires for your awakening.",
+                    "Life is an eternal present full of infinite possibilities.",
+                    "Seek the balance point between all extremes.",
+                    "True freedom is living without the chains of the past.",
+                    "Your awareness is the sun that illuminates your everyday reality.",
+                    "The miracle is seeing the sacred in the ordinary.",
+                    "The union of opposites generates the spark of creation.",
+                    "Awaken to your true divine nature.",
+                    "The light of truth does not burn, it releases.",
+                    "Walk with the confidence of one who has seen the sun in the middle of the night.",
+                    "Transformation is the final destination of the Spiritual Warrior.",
+                    "Today is the day of your great awakening."
+                ], 
+                recommendations: ["Break an old paradigm today.", "Observe the beauty in the ordinary.", "Trust that the darkness is passing."] 
+            },
+            { 
+                name: 'Othila', 
+                symbol: 'ᛟ', 
+                meaning: 'Heritage and Belonging', 
+                thoughts: [
+                    "Honoring your parents doesn't mean repeating their mistakes, but extracting the wisdom from their history.",
+                    "Your home is where your heart feels at peace and aligned with its purpose.",
+                    "The most valuable legacy you will leave is not things, but the impact on the souls of others.",
+                    "You are the result of thousands of ancestors; their strength flows through your veins.",
+                    "True heritage is the integrity and values you transmit.",
+                    "Create a space of peace and beauty around you.",
+                    "Belonging to something bigger than yourself gives you roots and wings.",
+                    "Honor your traditions, but don't let them limit you.",
+                    "Security is born from knowing who you are and where you come from.",
+                    "Your home is the reflection of your inner order.",
+                    "Protect what you have built with effort and love.",
+                    "The wisdom of the elders is the map for the young.",
+                    "Spiritual legacy is the only wealth that transcends death.",
+                    "Take care of the land you step on; it is your children's inheritance.",
+                    "Family is the first workshop of the Spiritual Warrior.",
+                    "Seek peace in your roots so you can grow toward the sky.",
+                    "Loyalty to your principles is your most prized property.",
+                    "Every ending in Othila is a return to pure essence.",
+                    "Build something that lasts beyond your physical time.",
+                    "You are the keeper of the flame of your lineage."
+                ], 
+                recommendations: ["Connect with your family roots.", "Beautify your physical space today.", "Define your fundamental values."] 
+            }
+        ];
+
+        const App = () => {
+            const [selectedRune, setSelectedRune] = useState(null);
+            const [isSpinning, setIsSpinning] = useState(false);
+            const [showReadme, setShowReadme] = useState(false);
+
+            const pickRune = () => {
+                setIsSpinning(true);
+                setSelectedRune(null);
+                
+                setTimeout(() => {
+                    const randomRune = RUNES_DATABASE[Math.floor(Math.random() * RUNES_DATABASE.length)];
+                    const randomThought = randomRune.thoughts[Math.floor(Math.random() * randomRune.thoughts.length)];
+                    const randomRec = randomRune.recommendations[Math.floor(Math.random() * randomRune.recommendations.length)];
+                    
+                    setSelectedRune({
+                        ...randomRune,
+                        currentThought: randomThought,
+                        currentRec: randomRec
+                    });
+                    setIsSpinning(false);
+                }, 1200);
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col items-center p-6 bg-slate-950">
+                    {/* Info Button */}
+                    <button 
+                        onClick={() => setShowReadme(true)}
+                        className="fixed top-6 right-6 w-10 h-10 bg-slate-900 border border-slate-700 rounded-full text-amber-500 flex items-center justify-center text-xl font-bold shadow-lg z-50 hover:bg-slate-800 transition-all"
+                    >
+                        ?
+                    </button>
+
+                    {/* Information Modal */}
+                    {showReadme && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
+                            <div className="bg-slate-900 border border-slate-700 w-full max-w-lg rounded-2xl p-8 shadow-2xl">
+                                <h2 className="text-2xl font-serif text-amber-500 mb-4 border-b border-slate-800 pb-2">Oracle Guide</h2>
+                                <div className="text-slate-300 text-sm mb-6 space-y-4 leading-relaxed custom-scrollbar max-h-60 overflow-y-auto pr-2">
+                                    <p>
+                                        This expanded version features <strong>480 unique thoughts</strong> (20 per rune), ensuring unprecedented analytical depth in your dialogue with the unconscious.
+                                    </p>
+                                    <p>
+                                        Runes act as <strong>"secret codes"</strong>. According to Eros Rodrich, by drawing one at random, synchronicity allows your conscious mind to find answers in the universal symbols of the Spiritual Warrior.
+                                    </p>
+                                    <p className="italic text-amber-500/70">"The whisper of runic symbols is a living guide to navigate the complexities of the present."</p>
+                                </div>
+                                <button 
+                                    onClick={() => setShowReadme(false)} 
+                                    className="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-xl font-bold transition-all shadow-lg active:scale-95"
+                                >
+                                    UNDERSTOOD
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Header */}
+                    <header className="text-center mb-10 pt-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+                        <h1 className="text-4xl md:text-5xl font-serif font-bold text-amber-100 tracking-wider">Your Rune of the Day</h1>
+                        <p className="text-slate-500 italic mt-2 text-sm tracking-widest uppercase">Deep Dialogue with the Self</p>
+                    </header>
+
+                    {/* Main Area */}
+                    <main className="w-full max-w-md flex flex-col items-center">
+                        <div className="relative w-72 h-72 mb-10 flex items-center justify-center">
+                            <div className={`absolute inset-0 border-2 border-dashed border-amber-900/30 rounded-full ${isSpinning ? 'animate-spin-slow' : ''}`}></div>
+                            <div className="absolute inset-4 border border-amber-700/10 rounded-full"></div>
+                            
+                            <div className="relative z-10 w-56 h-56 bg-slate-900 rounded-[3rem] shadow-[0_0_60px_rgba(0,0,0,0.8)] border border-slate-800 flex flex-col items-center justify-center p-6 transition-all duration-500 overflow-hidden">
+                                {isSpinning ? (
+                                    <div className="text-amber-500 text-center animate-pulse">
+                                        <div className="w-12 h-12 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                                        <p className="text-[10px] uppercase tracking-[0.3em] font-bold">Deciphering the Whisper...</p>
+                                    </div>
+                                ) : selectedRune ? (
+                                    <div className="text-center animate-in fade-in zoom-in duration-700">
+                                        <span className="text-8xl text-amber-200 font-serif rune-glow block leading-none">
+                                            {selectedRune.symbol}
+                                        </span>
+                                        <h2 className="text-xl font-bold text-amber-100 tracking-[0.2em] mt-4 uppercase border-t border-amber-500/20 pt-2">
+                                            {selectedRune.name}
+                                        </h2>
+                                        <p className="text-amber-600 text-[10px] font-bold uppercase tracking-widest mt-1">
+                                            {selectedRune.meaning}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="text-slate-700 text-center px-4 opacity-50">
+                                        <span className="text-4xl mb-2 block">ᚦ</span>
+                                        <p className="text-[10px] italic uppercase tracking-widest leading-loose">
+                                            Ask a question and draw a rune from the bag.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <button 
+                            onClick={pickRune} 
+                            disabled={isSpinning}
+                            className="group relative w-full py-4 bg-amber-600 hover:bg-amber-500 text-white rounded-2xl font-black tracking-[0.2em] shadow-2xl transition-all active:scale-95 disabled:opacity-50 overflow-hidden"
+                        >
+                            <span className="relative z-10 uppercase">
+                                {selectedRune ? "NEW CONSULTATION" : "DRAW RUNE"}
+                            </span>
+                            <div className="absolute inset-0 bg-gradient-to-r from-amber-700 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </button>
+
+                        {/* Reading Result */}
+                        {selectedRune && !isSpinning && (
+                            <div className="w-full mt-8 space-y-4 animate-in slide-in-from-bottom-8 duration-1000">
+                                <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 p-7 rounded-3xl shadow-xl border-t-amber-500/20">
+                                    <div className="flex items-center gap-2 mb-3 opacity-50">
+                                        <div className="w-1 h-1 bg-amber-500 rounded-full"></div>
+                                        <span className="text-[10px] font-bold uppercase tracking-widest">Today's Whisper</span>
+                                    </div>
+                                    <p className="text-xl md:text-2xl text-amber-50 font-serif italic text-center leading-relaxed">
+                                        "{selectedRune.currentThought}"
+                                    </p>
+                                </div>
+                                
+                                <div className="bg-emerald-950/10 border-l-4 border-emerald-500/40 p-5 rounded-r-2xl shadow-lg">
+                                    <h4 className="text-[10px] font-bold text-emerald-500/80 mb-2 uppercase tracking-[0.2em]">Suggested Action:</h4>
+                                    <p className="text-slate-300 text-sm leading-relaxed antialiased">
+                                        {selectedRune.currentRec}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="mt-auto pt-12 pb-6 text-slate-800 text-[10px] text-center uppercase tracking-[0.3em] font-bold opacity-50">
+                        Based on the runic system of Eros Rodrich • v2.5 (20x Database)
+                    </footer>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
